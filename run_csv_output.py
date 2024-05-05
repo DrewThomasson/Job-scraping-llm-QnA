@@ -14,16 +14,28 @@ def initialize_model():
     # or Meta-Llama-3-8B-Instruct.Q4_0.gguf for llama 3 8B
     # orca-mini-3b-gguf2-q4_0.gguf
     #Phi-3-mini-4k-instruct.Q4_0.gguf
+def load_processed_urls(filename):
+    """ Load processed job URLs from CSV file to avoid re-processing """
+    try:
+        with open(filename, mode='r', newline='', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            processed_urls = {rows[0] for rows in reader}
+            return processed_urls
+    except FileNotFoundError:
+        return set()
 
-def process_jobs(job_posts, model):
+def process_jobs(job_posts, model, processed_urls):
     """ Process each job posting to generate the formatted response and print only the generated output """
-    with open('job_results.csv', 'w', newline='', encoding='utf-8') as file:
+    with open('job_results.csv', mode='a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        # Write the headers to the CSV file
-        writer.writerow(['Job URL', 'Job Title', 'Company Name', 'Location', 'Salary', 'Job Type', 'Job Description', 'Experience Required', 'Qualifications', 'Security Clearance', 'Job Location', 'Position Type', 'Programming Languages', 'Raw Output'])
+        if not processed_urls:
+            # Write the headers to the CSV file only if it's the first run
+            writer.writerow(['Job URL', 'Job Title', 'Company Name', 'Location', 'Salary', 'Job Type', 'Job Description', 'Experience Required', 'Qualifications', 'Security Clearance', 'Job Location', 'Position Type', 'Programming Languages', 'Raw Output'])
 
         for job_url, job_details in tqdm(job_posts.items(), desc="Processing Jobs"):
-            # Create the prompt from job details
+            if job_url in processed_urls:
+                continue  # Skip processing if URL has already been processed
+
             prompt = f"""
             Analyze the job details provided and generate a structured response to the following questions:
             - Job Title: {job_details.get('Job Title', 'No entry found for Job Title')}
@@ -40,27 +52,13 @@ def process_jobs(job_posts, model):
             4. Is the position on-site, hybrid, or remote?
             5. What is the position type? (contract, temp-to-hire, full-time, part-time, etc.)
             6. What programming languages should the candidate know?
-
-            Please respond in the format:
-            - Experience Required: [Yes/No, if yes, years required]
-            - Qualifications: [Preferred/Required: details]
-            - Security Clearance: [Yes/No, if yes, specifics]
-            - Job Location: [On-site/Hybrid/Remote]
-            - Position Type: [Contract/Temp-to-Hire/Full-Time/Part-Time]
-            - Programming Languages: [Languages required]
             """
 
-            # Generate output from the model
             generated_output = model.generate(prompt, max_tokens=350)
-
-            # Print the generated output
             print(f"Generated Output for {job_url}: {generated_output}")
 
-            # Parse the output into structured format for CSV (this needs to be adjusted based on actual output format)
-            # Placeholder parsing: split by lines and remove dash
             parsed_output = dict(zip(['Experience Required', 'Qualifications', 'Security Clearance', 'Job Location', 'Position Type', 'Programming Languages'], [x.split(': ')[1] if len(x.split(': ')) > 1 else '' for x in generated_output.split('\n')[1:]]))
 
-            # Write to CSV including the raw output
             writer.writerow([
                 job_url,
                 job_details.get('Job Title', ''),
@@ -75,18 +73,14 @@ def process_jobs(job_posts, model):
                 parsed_output.get('Job Location', ''),
                 parsed_output.get('Position Type', ''),
                 parsed_output.get('Programming Languages', ''),
-                generated_output  # Adding raw output to the CSV
+                generated_output
             ])
 
 def main():
-    # Load job postings from a JSON file
     job_posts = load_data('job_posts.json')
-
-    # Initialize the GPT4All model
     model = initialize_model()
-
-    # Process each job posting and print generated answers
-    process_jobs(job_posts, model)
+    processed_urls = load_processed_urls('job_results.csv')
+    process_jobs(job_posts, model, processed_urls)
 
 if __name__ == "__main__":
     main()
