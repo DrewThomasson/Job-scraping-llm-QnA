@@ -13,3 +13,7 @@ tqdm -for the terminal loading bar
 run using `Python run.py` for a modifed json output that answers the specified questions
 
 run using `python run_csv_output.py` for a csv output file that answers the specified questions
+
+## To update all of the code with a git pull withoput a warning run
+
+`git fetch --all && git reset --hard origin/main`
