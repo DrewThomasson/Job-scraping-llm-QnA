@@ -9,55 +9,46 @@ def load_data(filename):
 
 def initialize_model():
     """ Initialize the GPT4All model """
-    return GPT4All("orca-mini-3b-gguf2-q4_0.gguf")
+    return GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf")
     #or Meta-Llama-3-8B-Instruct.Q4_0.gguf for llama 3 8B
+    #orca-mini-3b-gguf2-q4_0.gguf
+
 
 def process_jobs(job_posts, model):
-    """ Process each job posting to generate the formatted response and print input and output """
-    output = {}
+    """ Process each job posting to generate the formatted response and print only the generated output """
     for job_url, job_details in tqdm(job_posts.items(), desc="Processing Jobs"):
-        # Prepare the input details to print
-        input_details = f"""
-        Job Title: {job_details.get('Job Title', 'No entry found for Job Title')}
-        Company Name: {job_details.get('Company Name', 'No entry found for Company Name')}
-        Location: {job_details.get('Location', 'No entry found for Location')}
-        Salary: {job_details.get('Salary', 'No entry found for Salary')}
-        Job Type: {job_details.get('Job Type', 'No entry found for Job Type')}
-        Job Description: {job_details.get('Job Description', 'No entry found for Job Description')}
-        """
-
-        # Print the input details
-        print(f"Input for {job_url}:\n{input_details}")
-
-        # Create the prompt
+        # Create the prompt from job details
         prompt = f"""
-        Please analyze the job details and answer in the specified format:
-        {input_details}
-        -- Answer format: "Job Title: {{answer}}, Salary: {{answer}}, Location: {{answer}}, Type: {{answer}}, Description: {{answer}}"
-        """
+        Analyze the job details provided and generate a structured response to the following questions:
+        - Job Title: {job_details.get('Job Title', 'No entry found for Job Title')}
+        - Company Name: {job_details.get('Company Name', 'No entry found for Company Name')}
+        - Location: {job_details.get('Location', 'No entry found for Location')}
+        - Salary: {job_details.get('Salary', 'No entry found for Salary')}
+        - Job Type: {job_details.get('Job Type', 'No entry found for Job Type')}
+        - Job Description: {job_details.get('Job Description', 'No entry found for Job Description')}
+        
+        Questions:
+        1. Does the job require experience? If yes, how many years?
+        2. Which qualifications are preferred and which are required?
+        3. Does it require security clearance or US citizenship?
+        4. Is the position on-site, hybrid, or remote?
+        5. What is the position type? (contract, temp-to-hire, full-time, part-time, etc.)
+        6. What programming languages should the candidate know?
 
-        # Print the custom prompt for clarity in debugging
-        print(f"Prompt for {job_url}:")
-        print(prompt)
+        Please respond in the format:
+        - Experience Required: [Yes/No, if yes, years required]
+        - Qualifications: [Preferred/Required: details]
+        - Security Clearance: [Yes/No, if yes, specifics]
+        - Job Location: [On-site/Hybrid/Remote]
+        - Position Type: [Contract/Temp-to-Hire/Full-Time/Part-Time]
+        - Programming Languages: [Languages required]
+        """
 
         # Generate output from the model
-        generated_output = model.generate(prompt, max_tokens=150)
+        generated_output = model.generate(prompt, max_tokens=350)
 
-        # Print the generated output for monitoring
-        print(f"Generated Output for {job_url}:")
-        print(generated_output)
-
-        # Store the output
-        output[job_url] = generated_output
-
-    return output
-
-
-def save_results(output):
-    """ Save the processed outputs to a file """
-    with open('processed_job_posts.json', 'w') as outfile:
-        json.dump(output, outfile, indent=4)
-    print("Processing complete and data saved.")
+        # Print the generated output
+        print(f"Generated Output for {job_url}: {generated_output}")
 
 def main():
     # Load job postings from a JSON file
@@ -66,12 +57,8 @@ def main():
     # Initialize the GPT4All model
     model = initialize_model()
 
-    # Process each job posting and generate answers
-    processed_data = process_jobs(job_posts, model)
-
-    # Save the processed data to a new JSON file
-    save_results(processed_data)
+    # Process each job posting and print generated answers
+    process_jobs(job_posts, model)
 
 if __name__ == "__main__":
     main()
-
