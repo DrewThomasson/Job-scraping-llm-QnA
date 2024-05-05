@@ -10,4 +10,6 @@ gpt4all- for loading and running the llms
 tqdm -for the terminal loading bar
 `pip install tqdm`
 
-run using `Python run.py`
+run using `Python run.py` for a modifed json output that answers the specified questions
+
+run using `python run_csv_output.py` for a csv output file that answers the specified questions
