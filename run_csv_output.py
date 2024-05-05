@@ -19,7 +19,7 @@ def process_jobs(job_posts, model):
     with open('job_results.csv', 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         # Write the headers to the CSV file
-        writer.writerow(['Job URL', 'Job Title', 'Company Name', 'Location', 'Salary', 'Job Type', 'Job Description', 'Experience Required', 'Qualifications', 'Security Clearance', 'Job Location', 'Position Type', 'Programming Languages'])
+        writer.writerow(['Job URL', 'Job Title', 'Company Name', 'Location', 'Salary', 'Job Type', 'Job Description', 'Experience Required', 'Qualifications', 'Security Clearance', 'Job Location', 'Position Type', 'Programming Languages', 'Raw Output'])
 
         for job_url, job_details in tqdm(job_posts.items(), desc="Processing Jobs"):
             # Create the prompt from job details
@@ -59,7 +59,7 @@ def process_jobs(job_posts, model):
             # Placeholder parsing: split by lines and remove dash
             parsed_output = dict(zip(['Experience Required', 'Qualifications', 'Security Clearance', 'Job Location', 'Position Type', 'Programming Languages'], [x.split(': ')[1] if len(x.split(': ')) > 1 else '' for x in generated_output.split('\n')[1:]]))
 
-            # Write to CSV
+            # Write to CSV including the raw output
             writer.writerow([
                 job_url,
                 job_details.get('Job Title', ''),
@@ -73,7 +73,8 @@ def process_jobs(job_posts, model):
                 parsed_output.get('Security Clearance', ''),
                 parsed_output.get('Job Location', ''),
                 parsed_output.get('Position Type', ''),
-                parsed_output.get('Programming Languages', '')
+                parsed_output.get('Programming Languages', ''),
+                generated_output  # Adding raw output to the CSV
             ])
 
 def main():
