@@ -10,7 +10,7 @@ def load_data(filename):
 
 def initialize_model():
     """ Initialize the GPT4All model """
-    return GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf")
+    return GPT4All("Phi-3-mini-4k-instruct.Q4_0.gguf")
     # or Meta-Llama-3-8B-Instruct.Q4_0.gguf for llama 3 8B
     # orca-mini-3b-gguf2-q4_0.gguf
     #Phi-3-mini-4k-instruct.Q4_0.gguf
