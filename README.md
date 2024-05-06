@@ -11,7 +11,7 @@ tqdm -for the terminal loading bar
 
 selenium and firefox are needed for the web scraping from indeed
 
-`pip install tqdm gpt4all ollama selenium`
+`pip install tqdm gpt4all ollama selenium PyQt5`
 
 run using `Python run.py` for a modifed json output that answers the specified questions
 
