@@ -5,10 +5,13 @@ needed installs:
 
 
 gpt4all- for loading and running the llms
-`pip install gpt4all`
+
 
 tqdm -for the terminal loading bar
-`pip install tqdm`
+
+selenium and firefox are needed for the web scraping from indeed
+
+`pip install tqdm gpt4all ollama selenium`
 
 run using `Python run.py` for a modifed json output that answers the specified questions
 
