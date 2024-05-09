@@ -1,5 +1,13 @@
 #!/bin/bash
 
+print Make sure you have Ollama installed before running this or it won't work
+
+print installing wget with brew...
+
+brew install wget
+
+print Complete!
+
 # Download first file
 wget https://huggingface.co/failspy/kappa-3-phi-3-4k-instruct-abliterated-GGUF/resolve/main/ggml-model-f16.gguf?download=true -O ggml-model-f16.gguf
 
@@ -50,3 +58,8 @@ ollama create uncensored_llama3 -f Modelfile
 
 # List all ollama models
 ollama list
+
+# Remove downloaded files and Modelfile
+print removing Modelfile and Downloaded files...
+rm ggml-model-f16.gguf Llama-3-8B-Instruct-abliterated-q4_k.gguf Modelfile
+Print Complete!
